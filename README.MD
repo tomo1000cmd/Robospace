@@ -1,91 +1,188 @@
-Robot 2D Simulation Project
-This project is a 2D simulation of a robotic environment where two robots ("robot1" and "robot2") navigate a house layout using pathfinding and autonomous patrol behaviors. The simulation is built with Python and Pygame, featuring a modular, object-oriented design with separate files for different components.
-Overview
+Autonomous Robot Simulation
 
-Purpose: Simulate robot navigation in a 40x40 grid-based house layout with rooms, doors, and obstacles.
-Features:
-Two robots with distinct roles and behaviors.
-Autonomous patrol and manual control modes.
-Real-time UI with start/stop buttons, mode toggles, status displays, and logs.
-Pathfinding using the A* algorithm.
-Modular design with separate files for environment, robots, agents, UI, and pathfinding.
+This project simulates a multi-robot system for autonomous navigation and room coverage in a predefined house layout. The system is built using Python and Pygame, allowing users to interact with robots, assign tasks, and visualize their movements in a grid-based environment.
+
+System Overview
+
+The simulation involves multiple robots navigating a house layout with rooms and doors, performing tasks such as moving to specific locations or covering entire rooms. The system includes a task manager for assigning tasks, a communication channel for message passing, and a user interface for controlling and monitoring robots.
+Key Features
+
+Multi-Robot Navigation: Two robots navigate a grid-based house layout, avoiding obstacles and other robots.
+Task Assignment: Users can assign tasks (e.g., go to a location or cover a room) via a text input or mouse clicks.
+Dynamic Pathfinding: Robots use the A* algorithm to find optimal paths, considering static and dynamic obstacles.
+Room Coverage: Robots can cover entire rooms using a predefined coverage path.
+Interactive UI: A Pygame-based interface displays robot status, logs, and allows task control.
+Real-Time Monitoring: Logs and coverage percentages are updated in real-time.
+
+System Architecture
+The system is modular, with components interacting through a communication channel. Below is a schematic of the system architecture:
++---------------------+       +---------------------+       +---------------------+
+|      Pygame UI      |<----->|    CommChannel     |<----->|      TaskManager    |
+| - RobotControlPanel |       | - Publishes messages|       | - Assigns tasks     |
+| - InputBox          |       | - Stores messages   |       | - Tracks robot status|
+| - Global Buttons    |       |                     |       | - Manages rooms     |
++---------------------+       +---------------------+       +---------------------+
+                                     |
+                                     |
+                                     v
++---------------------+       +---------------------+       +---------------------+
+|      Robot(s)       |<----->|      Agents        |       |     Environment     |
+| - Position          |       | - VehicleOperating |       | - Grid layout       |
+| - Visited cells     |       | - MonitoringLogging|       | - Rooms & Doors     |
+| - Draws itself      |       | - Configuration     |       | - Obstacles         |
++---------------------+       | - Cooperative       |       | - Cleanable cells   |
+                              | - Forecasting       |       +---------------------+
+                              +---------------------+
+                                     |
+                                     v
++---------------------+       +---------------------+
+|     Pathfinding     |       |    House Layout    |
+| - A* algorithm      |       | - ROOMS dict       |
+| - Coverage path     |       | - DOORS list       |
++---------------------+       +---------------------+
+
+Component Descriptions
+
+Pygame UI (ui.py, launch.py):
+
+Displays the grid, robots, and control panels.
+Handles user input (mouse clicks, text input) to assign tasks or add obstacles.
+Includes RobotControlPanel for robot-specific controls, InputBox for task input, and global buttons (Send Task, Reset).
 
 
-Date Created: August 18, 2025
+CommChannel (launch.py):
 
-Requirements
-
-Python 3.x
-Pygame library (pip install pygame)
-
-Installation
-
-Clone or download the repository to your local machine.
-Ensure all files are in the same directory:
-robot2d.py
-environment.py
-robot.py
-agents.py
-pathfinding.py
-ui.py
-house_layout.py
+A message-passing system that allows components (robots, agents, UI) to communicate.
+Supports broadcasting commands like "go_to", "cover_room", "start", and "stop".
 
 
-Install the required dependency:pip install pygame
+TaskManager (task_manager.py):
+
+Manages task assignment to robots based on their status and proximity to room centers.
+Tracks robot states (idle/busy) and room assignments.
+Publishes tasks to the CommChannel.
 
 
+Robot (robot.py):
+
+Represents a robot with position, color, and visited cells.
+Draws itself and its path on the Pygame surface.
+Interacts with agents to update status and execute tasks.
+
+
+Agents (agents.py):
+
+VehicleOperatingAgent: Handles robot movement, pathfinding, and task execution (go_to, cover_room).
+MonitoringLoggingAgent: Logs commands for each robot, displayed in the UI.
+ConfigurationAgent, CooperativeAgent, ForecastingAgent: Placeholder agents for future extensions (currently minimal functionality).
+
+
+Environment (environment.py):
+
+Defines the grid-based house layout with rooms, walls, and doors.
+Manages obstacles and cleanable cells.
+Provides methods for validating positions and drawing the grid.
+
+
+Pathfinding (pathfinding.py):
+
+Implements the A* algorithm for navigation, considering static (walls) and dynamic (other robots) obstacles.
+Generates coverage paths for room cleaning tasks.
+
+
+House Layout (house_layout.py):
+
+Defines the house structure with rooms (e.g., kitchen, living room) and doors.
+Used by Environment to set up the grid and obstacles.
+
+
+
+How It Works
+
+Initialization:
+
+The App class in launch.py initializes Pygame, the environment, robots, agents, and UI elements.
+Robots are placed at starting positions (e.g., (1, 1) and (38, 38)).
+The TaskManager is set up with robot IDs and room centers.
+
+
+User Interaction:
+
+Users can select a robot via the control panel and assign tasks:
+Mouse Click: Left-click on the grid to send a "go_to" command to a valid position.
+Text Input: Enter a task tuple (e.g., ("go_to", (10, 10)) or ("cover_room", (5, 5))) in the input box and click "Send Task".
+Buttons: Start/stop robot movement or reset the simulation.
+
+
+Right-clicking adds obstacles to the grid, clearing the path cache.
+
+
+Task Processing:
+
+The TaskManager assigns "cover_room" tasks to idle robots, prioritizing the closest unassigned room.
+The VehicleOperatingAgent processes commands, computing paths using A* or coverage paths for rooms.
+Robots move along paths at a fixed interval (0.2 seconds), updating their position and coverage percentage.
+
+
+Dynamic Obstacle Avoidance:
+
+The VehicleOperatingAgent uses status messages from other robots to avoid collisions by treating their positions (and adjacent cells) as dynamic obstacles.
+
+
+Rendering and Logging:
+
+The UI updates every frame, showing robot positions, paths, status, and logs.
+The MonitoringLoggingAgent records commands, limited to the last 5 entries per robot.
+Coverage percentage is calculated based on visited cleanable cells.
+
+
+
+Running the Simulation
+Prerequisites
+
+Python 3.8+
+Pygame (pip install pygame)
+
+Instructions
+
+Clone the repository or save all provided files in a directory.
+Ensure house_layout.py, environment.py, robot.py, pathfinding.py, agents.py, task_manager.py, ui.py, and launch.py are in the same directory.
 Run the simulation:python launch.py
 
 
-
-Usage
-Running the Simulation
-
-Launch the script to open a 1200x900 Pygame window.
-The grid (40x40 cells) displays the house layout with rooms and obstacles.
-Two robots start at (1, 1) and (38, 38).
-
-Controls
-
-UI Panels (right side):
-Click a panel to select a robot (Barn Cleaner or Chaser Bin).
-Start: Begin movement or patrol.
-Stop: Halt the robot.
-Mode: Toggle between "Manual" (left-click to move) and "Autonomous" (patrols room centers).
-Status: Displays current status, motion, position, mode, and special stat (e.g., "Cleaned Area: 50%").
-Logs: Shows the last 5 log entries.
-
-
-Grid Interaction:
-Left-click on the grid to command the selected robot to move to that position (manual mode).
-Right-click to add obstacles (clears path cache).
-
-
-Global Buttons:
-Stop All: Stops both robots.
-Reset: Clears obstacles, resets the layout, and repositions robots.
+Interact with the simulation:
+Click on a robot’s control panel to select it.
+Left-click on the grid to send a "go_to" task.
+Right-click to add obstacles.
+Enter task tuples in the input box (e.g., ("go_to", (10, 10)) or ("cover_room", (5, 5))) and click "Send Task".
+Use "Start" and "Stop" buttons to control robot movement.
+Click "Reset Simulation" to restart.
 
 
 
-Behavior
+Example Usage
 
-Autonomous Mode: Robots patrol room centers every 5 seconds.
-Manual Mode: Robots move to clicked positions using A* pathfinding.
-Special Stats: Barn Cleaner tracks "Cleaned Area," Chaser Bin tracks "Harvest Load" (random values).
+To send a robot to a specific position:
+Select a robot by clicking its panel.
+Enter ("go_to", (15, 15)) in the input box and click "Send Task".
 
-Project Structure
 
-robot2d.py: Main application file, orchestrates all components.
-environment.py: Defines the Environment class for the grid and house layout.
-robot.py: Defines the Robot class with drawing and movement logic.
-agents.py: Contains all agent classes (e.g., VehicleOperatingAgent, AnomalyAgent) for robot behavior.
-pathfinding.py: Implements the A* pathfinding algorithm.
-ui.py: Defines UI components (Button, RobotControlPanel) for interaction.
-house_layout.py: Defines the house layout with rooms and doors.
+To assign a room coverage task:
+Enter ("cover_room", (5, 5)) (kitchen center) in the input box.
+The robot will navigate to the room and cover it systematically.
 
-Contributing
-Feel free to fork the repository and submit pull requests for enhancements or bug fixes. Suggestions for new features (e.g., additional robots, sensors) are welcome!
+
+To add an obstacle:
+Right-click a grid cell to block it, forcing robots to replan paths.
+
+
+
+Future Improvements
+
+Enhance CooperativeAgent for better robot coordination.
+Implement ForecastingAgent for predictive task planning.
+Add more complex task types (e.g., multi-room coverage).
+Improve UI with task history and detailed robot stats.
+
 License
-This project is open-source under the MIT License (see LICENSE file for details, if applicable).
-Contact
-For questions or support, please open an issue on the repository or contact the project maintainer.
+This project is for educational purposes and provided as-is. Feel free to modify and extend it for your needs.

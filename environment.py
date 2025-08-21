@@ -8,25 +8,48 @@ class Environment:
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
         self.obstacles = set()
         self.rooms = []
+        self.cleanable = set()
         self._add_obstacles()
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.is_valid_position(x, y):
+                    self.cleanable.add((x, y))
 
     def _add_obstacles(self):
-        door_positions = {door["pos"] for door in DOORS}
+        door_positions = {tuple(door["pos"]) for door in DOORS}  # Ensure pos is a tuple
         for room_name, room_data in ROOMS.items():
             x1, x2 = room_data["x_range"]
             y1, y2 = room_data["y_range"]
-            room = {"bounds": (x1, y1, x2, y2), "center": ((x1 + x2) // 2, (y1 + y2) // 2)}
+            room = {"name": room_name, "bounds": (x1, y1, x2, y2), "center": ((x1 + x2) // 2, (y1 + y2) // 2)}
             self.rooms.append(room)
             for x in range(x1, x2 + 1):
-                if (x, y1) not in door_positions and (x, y1) not in [(1, 1), (self.width - 2, self.height - 2)]:
-                    self.obstacles.add((x, y1))
-                if (x, y2) not in door_positions and (x, y2) not in [(1, 1), (self.width - 2, self.height - 2)]:
-                    self.obstacles.add((x, y2))
+                # Top wall
+                pos = (x, y1)
+                if pos not in door_positions and pos not in [(1, 1), (self.width - 2, self.height - 2)]:
+                    self.obstacles.add(pos)
+                # Bottom wall
+                pos = (x, y2)
+                if pos not in door_positions and pos not in [(1, 1), (self.width - 2, self.height - 2)]:
+                    self.obstacles.add(pos)
             for y in range(y1, y2 + 1):
-                if (x1, y) not in door_positions and (x1, y) not in [(1, 1), (self.width - 2, self.height - 2)]:
-                    self.obstacles.add((x1, y))
-                if (x2, y) not in door_positions and (x2, y) not in [(1, 1), (self.width - 2, self.height - 2)]:
-                    self.obstacles.add((x2, y))
+                # Left wall
+                pos = (x1, y)
+                if pos not in door_positions and pos not in [(1, 1), (self.width - 2, self.height - 2)]:
+                    self.obstacles.add(pos)
+                # Right wall
+                pos = (x2, y)
+                if pos not in door_positions and pos not in [(1, 1), (self.width - 2, self.height - 2)]:
+                    self.obstacles.add(pos)
+
+        # Ensure doors create proper 1x1 openings by removing adjacent wall cells if needed
+        for door in DOORS:
+            door_pos = tuple(door["pos"])
+            for dx, dy in [(0, 0), (0, 1), (1, 0), (0, -1), (-1, 0)]:  # Center and neighbors
+                check_pos = (door_pos[0] + dx, door_pos[1] + dy)
+                if (check_pos in self.obstacles and 
+                    0 <= check_pos[0] < self.width and 0 <= check_pos[1] < self.height and
+                    check_pos not in [(1, 1), (self.width - 2, self.height - 2)]):
+                    self.obstacles.remove(check_pos)
 
     def _add_wall(self, start_x, start_y, length, horizontal=True):
         for i in range(length):
