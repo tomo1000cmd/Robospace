@@ -16,7 +16,7 @@ Real-Time Monitoring: Logs and coverage percentages are updated in real-time.
 
 System Architecture
 
-![System Architecture](system_architecture.svg)
+
 The system is modular, with components interacting through a communication channel. Below is a schematic of the system architecture:
 +---------------------+       +---------------------+       +---------------------+
 |      Pygame UI      |<----->|    CommChannel     |<----->|      TaskManager    |
