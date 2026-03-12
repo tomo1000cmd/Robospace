@@ -18,6 +18,7 @@ System Architecture
 
 
 The system is modular, with components interacting through a communication channel. Below is a schematic of the system architecture:
+
 +---------------------+       +---------------------+       +---------------------+
 |      Pygame UI      |<----->|    CommChannel     |<----->|      TaskManager    |
 | - RobotControlPanel |       | - Publishes messages|       | - Assigns tasks     |
@@ -42,6 +43,7 @@ The system is modular, with components interacting through a communication chann
 | - A* algorithm      |       | - ROOMS dict       |
 | - Coverage path     |       | - DOORS list       |
 +---------------------+       +---------------------+
+
 
 Component Descriptions
 
