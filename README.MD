@@ -1,5 +1,6 @@
 Autonomous Robot Simulation
-![model](https://github.com/tomo1000cmd/Robospace/blob/main/robospace1.mp4?raw=true)
+<video src="https://github.com/tomo1000cmd/Robospace/blob/main/robospace1.mp4"  width="352" height="720"></video>
+
 ![Model](https://github.com/tomo1000cmd/Robospace/blob/main/Screenshot%20from%202025-09-30%2018-09-43.png) 
 
 
