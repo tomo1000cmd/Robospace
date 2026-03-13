@@ -1,5 +1,5 @@
 Autonomous Robot Simulation
-
+![Model](https://github.com/tomo1000cmd/Robospace/blob/main/Screenshot%20from%202025-09-30%2018-09-43.png) 
 This project simulates a multi-robot system for autonomous navigation and room coverage in a predefined house layout. The system is built using Python and Pygame, allowing users to interact with robots, assign tasks, and visualize their movements in a grid-based environment.
 
 System Overview
